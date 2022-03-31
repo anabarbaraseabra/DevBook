@@ -14,7 +14,6 @@ var (
 )
 
 func Load() {
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)

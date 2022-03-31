@@ -4,7 +4,7 @@ USE devbook;
 DROP TABLE users;
 
 CREATE TABLE users (
-    id varchar(16) primary key,
+    id varchar(36) primary key,
     name varchar(55) not null,
     nick varchar(55) not null unique,
     email varchar(55) not null unique,
