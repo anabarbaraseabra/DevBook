@@ -15,13 +15,13 @@ var userRoutes = []Route{
 	{
 		Uri:            "/users",
 		Method:         http.MethodGet,
-		Function:       controllers.FindAllUsers,
+		Function:       controllers.SearchByNickOrName,
 		Authentication: false,
 	},
 	{
 		Uri:            "/users/{userID}",
 		Method:         http.MethodGet,
-		Function:       controllers.FindUser,
+		Function:       controllers.GetByID,
 		Authentication: false,
 	},
 	{

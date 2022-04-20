@@ -6,8 +6,10 @@ import (
 	"api/src/repository"
 	"api/src/responses"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -46,12 +48,38 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, user)
 }
 
-func FindAllUsers(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Finding users!"))
+func SearchByNickOrName(w http.ResponseWriter, r *http.Request) {
+	nameOrNick := strings.ToLower(r.URL.Query().Get("user"))
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repository := repository.NewUserRepository(db)
+	users, err := repository.SearchByNameOrNick(nameOrNick)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, users)
 }
 
-func FindUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Finding an user!"))
+func GetByID(w http.ResponseWriter, r *http.Request) {
+	userID := mux.Vars(r)["userID"]
+	db, err := database.Connect()
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+	repository := repository.NewUserRepository(db)
+	user, err := repository.GetByID(userID)
+	if err != nil {
+		responses.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, user)
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {

@@ -3,6 +3,7 @@ package repository
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -28,4 +29,39 @@ func (u *users) Create(user models.User) (string, error) {
 	}
 
 	return user.ID, nil
+}
+
+func (u *users) SearchByNameOrNick(nameOrNick string) ([]models.User, error) {
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) //%nameOrNick%
+	rows, err := u.db.Query(
+		"SELECT id, name, nick, email, createdAt FROM users WHERE name LIKE ? OR nick LIKE ?", //comparacao com like busca qualquer coisa que tenha o trecho da variavel
+		nameOrNick, nameOrNick)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		if err = rows.Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, err
+}
+
+func (u *users) GetByID(userID string) (models.User, error) {
+	rows, err := u.db.Query("SELECT id, name, nick, email, createdAt FROM users WHERE id = ?", userID)
+	if err != nil {
+		return models.User{}, err
+	}
+	defer rows.Close()
+	var user models.User
+	if rows.Next() {
+		if err = rows.Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.CreatedAt); err != nil {
+			return models.User{}, err
+		}
+	}
+	return user, nil
 }
